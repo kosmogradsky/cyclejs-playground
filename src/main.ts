@@ -1,25 +1,44 @@
-import { makeDOMDriver, div } from '@cycle/dom'
-import { run } from '@cycle/rxjs-run'
-import { Sources } from '@cycle/run';
-import { of } from 'rxjs';
-import * as range from 'ramda/src/range';
-import * as getDaysInMonth from 'date-fns/getDaysInMonth'
+import { h1, makeDOMDriver, VNode } from '@cycle/dom';
+import { DOMSource } from '@cycle/dom/rxjs-typings';
+import { makeHistoryDriver, Location } from '@cycle/history';
+import { run } from '@cycle/rxjs-run';
+import { of, EMPTY, Observable } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
-declare module 'ramda';
+import { Calendar } from './Calendar/Calendar';
+import { HsegChart } from './HsegChart/HsegChart';
 
-const main = (sources: Sources) => {
+import './styles.css';
+
+type mainFunction = (sources: {
+  DOM: DOMSource,
+  history: Observable<Location>
+}) => {
+  DOM: Observable<VNode>,
+  history: Observable<string>
+};
+
+
+const main: mainFunction = (sources) => {
+  const vdom$ = sources.history.pipe(
+    switchMap(location => {
+      switch (location.pathname) {
+        case '/calendar': return Calendar(sources).DOM;
+        case '/hseg-chart': return HsegChart(sources).DOM;
+        default: return of(h1('404'));
+      }
+    })
+  );
+
   return {
-    DOM: of(
-      div([
-        'Январь 2018',
-        ...[1,2,3].map((date) => div([date]))
-      ])
-    )
-  }
-}
+    DOM: vdom$,
+    history: EMPTY
+  };
+};
 
 const drivers = {
-  DOM: makeDOMDriver('#root')
-}
+  DOM: makeDOMDriver('#root'),
+  history: makeHistoryDriver()
+};
 
 run(main, drivers);

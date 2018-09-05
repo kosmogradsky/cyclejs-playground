@@ -1,0 +1,30 @@
+.calendar {
+  display: flex;
+}
+
+.month {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 1;
+}
+
+.monthName {
+  text-transform: capitalize;
+  margin-bottom: 10px;
+}
+
+.week {
+  display: flex;
+}
+
+.week:first-child {
+  align-self: flex-end;
+}
+
+.day {
+  display: block;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: 26px;
+  text-align: center;
+}
